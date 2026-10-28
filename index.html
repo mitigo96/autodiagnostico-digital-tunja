@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Autodiagnóstico Digital — Pequeños Negocios de Servicios de Tunja</title>
+<meta name="description" content="Prototipo web de autodiagnóstico de transformación digital para pequeños negocios de servicios de Tunja. Proyecto de grado UNAD." />
+<style>
+  :root{
+    --color-bg:#f5f7fa;
+    --color-surface:#ffffff;
+    --color-text:#1c2430;
+    --color-text-muted:#5b6774;
+    --color-primary:#1f6feb;
+    --color-primary-dark:#1554b8;
+    --color-primary-contrast:#ffffff;
+    --color-border:#dde3ea;
+    --color-success:#1f9d55;
+    --color-warning:#c98a00;
+    --color-danger:#d64545;
+    --color-inicial:#d64545;
+    --color-basico:#c98a00;
+    --color-avanzado:#1f9d55;
+    --radius:14px;
+    --shadow:0 2px 10px rgba(20,30,50,0.08);
+    color-scheme:light;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --color-bg:#10151c;
+      --color-surface:#1a212b;
+      --color-text:#e9edf2;
+      --color-text-muted:#9aa7b4;
+      --color-primary:#4f8ff7;
+      --color-primary-dark:#6fa3f8;
+      --color-primary-contrast:#071018;
+      --color-border:#2a333f;
+      --shadow:0 2px 14px rgba(0,0,0,0.45);
+      color-scheme:dark;
+    }
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background:var(--color-bg);
+    color:var(--color-text);
+    line-height:1.5;
+    min-height:100vh;
+  }
+  #app{
+    max-width:640px;
+    margin:0 auto;
+    padding:24px 18px 56px;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+  }
+  header.app-header{
+    text-align:center;
+    margin-bottom:18px;
+  }
+  header.app-header .brand{
+    font-size:13px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--color-text-muted);
+    margin-bottom:4px;
+  }
+  header.app-header h1{
+    font-size:1.35rem;
+    margin:0;
+  }
+  .card{
+    background:var(--color-surface);
+    border:1px solid var(--color-border);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:26px 22px;
+  }
+  .progress-wrap{
+    margin:0 0 20px;
+  }
+  .progress-bar{
+    height:8px;
+    background:var(--color-border);
+    border-radius:999px;
+    overflow:hidden;
+  }
+  .progress-bar > div{
+    height:100%;
+    background:var(--color-primary);
+    transition:width .3s ease;
+  }
+  .progress-label{
+    font-size:.8rem;
+    color:var(--color-text-muted);
+    margin-top:6px;
+    text-align:right;
+  }
+  h2.screen-title{
+    margin-top:0;
+    font-size:1.15rem;
+  }
+  p.lead{
+    color:var(--color-text-muted);
+    font-size:.95rem;
+  }
+  .dim-tag{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    background:rgba(31,111,235,0.1);
+    color:var(--color-primary);
+    font-weight:600;
+    font-size:.8rem;
+    padding:4px 10px;
+    border-radius:999px;
+    margin-bottom:14px;
+  }
+  fieldset{
+    border:none;
+    padding:0;
+    margin:0 0 20px;
+  }
+  legend{
+    font-weight:600;
+    margin-bottom:10px;
+    padding:0;
+  }
+  .opciones{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+  .opcion{
+    display:flex;
+    align-items:flex-start;
+    gap:10px;
+    border:1px solid var(--color-border);
+    border-radius:10px;
+    padding:11px 13px;
+    cursor:pointer;
+    transition:border-color .15s ease, background .15s ease;
+  }
+  .opcion:hover{ border-color:var(--color-primary); }
+  .opcion input{ margin-top:3px; accent-color:var(--color-primary); }
+  .opcion.selected{
+    border-color:var(--color-primary);
+    background:rgba(31,111,235,0.07);
+  }
+  input[type="text"]{
+    width:100%;
+    padding:10px 12px;
+    border:1px solid var(--color-border);
+    border-radius:10px;
+    background:var(--color-surface);
+    color:var(--color-text);
+    font-size:1rem;
+  }
+  .nav-row{
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+    margin-top:18px;
+  }
+  button{
+    font-family:inherit;
+    font-size:.95rem;
+    font-weight:600;
+    border-radius:10px;
+    padding:11px 18px;
+    cursor:pointer;
+    border:1px solid transparent;
+    transition:transform .05s ease, opacity .15s ease;
+  }
+  button:active{ transform:scale(0.98); }
+  button.primary{
+    background:var(--color-primary);
+    color:var(--color-primary-contrast);
+  }
+  button.primary:disabled{
+    opacity:.45;
+    cursor:not-allowed;
+  }
+  button.secondary{
+    background:transparent;
+    color:var(--color-text);
+    border-color:var(--color-border);
+  }
+  button.block{ width:100%; }
+  .centro{ text-align:center; }
+  .spinner{
+    width:40px;height:40px;
+    border-radius:50%;
+    border:4px solid var(--color-border);
+    border-top-color:var(--color-primary);
+    margin:28px auto;
+    animation:spin .8s linear infinite;
+  }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+  .resultado-dim{
+    border:1px solid var(--color-border);
+    border-radius:12px;
+    padding:14px 16px;
+    margin-bottom:12px;
+  }
+  .resultado-dim-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+    margin-bottom:8px;
+  }
+  .nivel-pill{
+    font-size:.78rem;
+    font-weight:700;
+    padding:3px 10px;
+    border-radius:999px;
+    color:#fff;
+    white-space:nowrap;
+  }
+  .nivel-inicial{ background:var(--color-inicial); }
+  .nivel-basico{ background:var(--color-warning); }
+  .nivel-avanzado{ background:var(--color-avanzado); }
+  .barra-nivel{
+    height:8px;
+    border-radius:999px;
+    background:var(--color-border);
+    overflow:hidden;
+  }
+  .barra-nivel > div{ height:100%; }
+  .recom-dim{ margin-bottom:18px; }
+  .recom-dim h3{
+    font-size:1rem;
+    margin:0 0 8px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .recom-dim ul{ margin:0; padding-left:20px; }
+  .recom-dim li{ margin-bottom:6px; }
+  footer.app-footer{
+    text-align:center;
+    color:var(--color-text-muted);
+    font-size:.75rem;
+    margin-top:26px;
+  }
+  .consent-box{
+    background:rgba(31,111,235,0.06);
+    border:1px solid var(--color-border);
+    border-radius:10px;
+    padding:12px 14px;
+    font-size:.85rem;
+    color:var(--color-text-muted);
+    margin:16px 0;
+  }
+  .consent-row{
+    display:flex;
+    align-items:flex-start;
+    gap:8px;
+    margin-top:10px;
+    font-size:.85rem;
+  }
+  .contexto-grid{
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+    margin-bottom:6px;
+  }
+  .contexto-grid label{
+    font-weight:600;
+    font-size:.9rem;
+    display:block;
+    margin-bottom:6px;
+  }
+  .skip-note{
+    font-size:.78rem;
+    color:var(--color-text-muted);
+    margin-top:4px;
+  }
+</style>
+</head>
+<body>
+<div id="app" role="main"></div>
+
+<script>
+/* =========================================================================
+   PROTOTIPO WEB DE AUTODIAGNÓSTICO — TRANSFORMACIÓN DIGITAL
+   Pequeños negocios de servicios de Tunja
+   Proyecto de grado UNAD — Ingeniería de Sistemas
+
+   Arquitectura modular (coherente con el numeral 8.4 / 9.7 del documento
+   maestro): el código se organiza en tres módulos que se comunican
+   mediante funciones puras y un único objeto de estado en memoria.
+     1) DATA     -> dimensiones, preguntas y catálogo de recomendaciones
+     2) MOTOR    -> lógica de clasificación (procesa respuestas -> niveles)
+     3) INTERFAZ -> renderizado de pantallas y manejo de eventos
+
+   No hay backend ni almacenamiento persistente: todo vive en memoria del
+   navegador durante la sesión (RNF5 / RNF2 del documento maestro).
+   ========================================================================= */
+
+/* ----------------------------- MÓDULO DATA ------------------------------ */
+const DATA = (function () {
+
+  const DIMENSIONES = [
+    { id: "presencia",      nombre: "Presencia y comunicación digital",      icono: "🌐" },
+    { id: "clientes",       nombre: "Gestión de clientes y procesos",         icono: "🗂️" },
+    { id: "datos",          nombre: "Uso de datos y colaboración",            icono: "📊" },
+    { id: "seguridad",      nombre: "Seguridad, privacidad y respaldo",       icono: "🔒" },
+    { id: "planificacion",  nombre: "Capacidades de planificación e innovación", icono: "🚀" }
+  ];
+
+  // Preguntas de contexto: no se usan para clasificar (evitan dato
+  // identificable obligatorio, RF2), solo dan marco a la sesión.
+  const PREGUNTAS_CONTEXTO = [
+    { id: "ctx_servicio", texto: "¿Qué tipo de servicio presta principalmente su negocio? (opcional)" },
+    { id: "ctx_personas",  texto: "¿Cuántas personas trabajan actualmente en el negocio? (opcional)" }
+  ];
+
+  // 15 preguntas cerradas, 3 por dimensión. Cada opción tiene un valor
+  // 0 (inicial), 1 (básico) o 2 (avanzado) usado por el motor de
+  // clasificación. Instrumento adaptado del cuestionario exploratorio
+  // del Anexo B del documento maestro (Fase 3).
+  const PREGUNTAS = [
+    // Dimensión 1 — Presencia y comunicación digital
+    { id: "p1", dimension: "presencia", texto: "¿Qué canales digitales usa para comunicarse con sus clientes?",
+      opciones: [
+        { texto: "Ninguno; solo trato personal o boca a boca", valor: 0 },
+        { texto: "WhatsApp o llamadas telefónicas", valor: 1 },
+        { texto: "WhatsApp Business, redes sociales y/o página web", valor: 2 }
+      ]},
+    { id: "p2", dimension: "presencia", texto: "¿Tiene presencia en redes sociales, directorios o página web?",
+      opciones: [
+        { texto: "No tiene ninguna presencia digital", valor: 0 },
+        { texto: "Tiene una sola plataforma, actualizada rara vez", valor: 1 },
+        { texto: "Tiene varias plataformas activas y actualizadas", valor: 2 }
+      ]},
+    { id: "p3", dimension: "presencia", texto: "¿Con qué frecuencia actualiza su información digital (precios, servicios, horarios)?",
+      opciones: [
+        { texto: "Nunca o casi nunca", valor: 0 },
+        { texto: "Cada varios meses", valor: 1 },
+        { texto: "Al menos una vez al mes", valor: 2 }
+      ]},
+
+    // Dimensión 2 — Gestión de clientes y procesos
+    { id: "p4", dimension: "clientes", texto: "¿Cómo registra la información de sus clientes y solicitudes?",
+      opciones: [
+        { texto: "No lleva ningún registro", valor: 0 },
+        { texto: "Cuaderno físico o de memoria", valor: 1 },
+        { texto: "Hoja de cálculo o aplicación digital", valor: 2 }
+      ]},
+    { id: "p5", dimension: "clientes", texto: "¿Usa alguna herramienta para organizar pedidos, citas o servicios?",
+      opciones: [
+        { texto: "No usa ninguna herramienta", valor: 0 },
+        { texto: "Agenda física o mensajes sueltos", valor: 1 },
+        { texto: "Calendario digital o aplicación especializada", valor: 2 }
+      ]},
+    { id: "p6", dimension: "clientes", texto: "¿Hace seguimiento a las solicitudes de clientes (pendientes, completadas)?",
+      opciones: [
+        { texto: "No hace seguimiento", valor: 0 },
+        { texto: "Seguimiento informal, sin herramienta", valor: 1 },
+        { texto: "Seguimiento sistemático con herramienta digital", valor: 2 }
+      ]},
+
+    // Dimensión 3 — Uso de datos y colaboración
+    { id: "p7", dimension: "datos", texto: "¿Consulta información o datos del negocio antes de tomar decisiones (ventas, gastos)?",
+      opciones: [
+        { texto: "No; decide principalmente por intuición", valor: 0 },
+        { texto: "Ocasionalmente revisa cuentas o cuadernos", valor: 1 },
+        { texto: "Sí, revisa reportes o datos organizados con regularidad", valor: 2 }
+      ]},
+    { id: "p8", dimension: "datos", texto: "¿Comparte información o documentos digitales con empleados o colaboradores?",
+      opciones: [
+        { texto: "No hay colaboración digital", valor: 0 },
+        { texto: "La comparte por WhatsApp o llamadas", valor: 1 },
+        { texto: "Usa carpetas compartidas o herramientas colaborativas", valor: 2 }
+      ]},
+    { id: "p9", dimension: "datos", texto: "¿Usa alguna herramienta digital para organizar inventario, pagos o finanzas?",
+      opciones: [
+        { texto: "No usa ninguna", valor: 0 },
+        { texto: "Lleva las cuentas en papel", valor: 1 },
+        { texto: "Usa una aplicación o archivo digital", valor: 2 }
+      ]},
+
+    // Dimensión 4 — Seguridad, privacidad y respaldo
+    { id: "p10", dimension: "seguridad", texto: "¿Realiza copias de seguridad de su información digital?",
+      opciones: [
+        { texto: "No realiza copias de seguridad", valor: 0 },
+        { texto: "Rara vez, de forma manual", valor: 1 },
+        { texto: "Sí, de forma periódica", valor: 2 }
+      ]},
+    { id: "p11", dimension: "seguridad", texto: "¿Qué medidas usa para proteger sus cuentas y dispositivos?",
+      opciones: [
+        { texto: "Ninguna medida particular", valor: 0 },
+        { texto: "Contraseñas básicas", valor: 1 },
+        { texto: "Contraseñas seguras y verificación en dos pasos", valor: 2 }
+      ]},
+    { id: "p12", dimension: "seguridad", texto: "¿Sabría qué hacer si pierde acceso a una cuenta o dispositivo con información del negocio?",
+      opciones: [
+        { texto: "No sabría qué hacer", valor: 0 },
+        { texto: "Tiene una idea general", valor: 1 },
+        { texto: "Tiene un procedimiento claro para esos casos", valor: 2 }
+      ]},
+
+    // Dimensión 5 — Capacidades de planificación e innovación
+    { id: "p13", dimension: "planificacion", texto: "¿Tiene algún objetivo o plan para incorporar más tecnología en el negocio?",
+      opciones: [
+        { texto: "No lo ha pensado", valor: 0 },
+        { texto: "Lo ha pensado, pero sin un plan concreto", valor: 1 },
+        { texto: "Tiene un plan o pasos definidos", valor: 2 }
+      ]},
+    { id: "p14", dimension: "planificacion", texto: "¿Qué tan dispuesto está a implementar mejoras digitales graduales?",
+      opciones: [
+        { texto: "Poco interesado por ahora", valor: 0 },
+        { texto: "Interesado, pero sin tiempo o conocimiento suficiente", valor: 1 },
+        { texto: "Interesado y dispuesto a empezar pronto", valor: 2 }
+      ]},
+    { id: "p15", dimension: "planificacion", texto: "¿Ha identificado qué proceso de su negocio le gustaría digitalizar primero?",
+      opciones: [
+        { texto: "No lo ha identificado", valor: 0 },
+        { texto: "Tiene una idea aproximada", valor: 1 },
+        { texto: "Lo tiene claramente identificado", valor: 2 }
+      ]}
+  ];
+
+  // Catálogo de recomendaciones por dimensión y nivel: de bajo costo,
+  // graduales y accionables (numeral 11 / RF4 del documento maestro).
+  const RECOMENDACIONES = {
+    presencia: {
+      inicial:  ["Cree una cuenta de WhatsApp Business gratuita para separar el contacto personal del profesional.",
+                 "Registre su negocio en Google Maps / Google Perfil de Negocio, sin costo."],
+      basico:   ["Defina un horario fijo semanal para publicar en la red social que ya usa.",
+                 "Agregue un catálogo breve de servicios con precios en su perfil digital."],
+      avanzado: ["Programe publicaciones con una herramienta gratuita (por ejemplo, Meta Business Suite) para mantener constancia.",
+                 "Revise qué publicaciones generan más contactos y repita ese formato."]
+    },
+    clientes: {
+      inicial:  ["Empiece a registrar clientes y solicitudes en una hoja de cálculo simple y gratuita (Google Sheets)."],
+      basico:   ["Use un calendario digital gratuito (Google Calendar) para agendar citas o entregas."],
+      avanzado: ["Evalúe una aplicación ligera y gratuita de gestión de clientes (CRM) para negocios pequeños."]
+    },
+    datos: {
+      inicial:  ["Lleve un registro digital simple de ventas y gastos, aunque sea en una hoja de cálculo."],
+      basico:   ["Revise semanalmente ese registro para identificar qué servicios son más rentables."],
+      avanzado: ["Comparta esa información con su equipo mediante una carpeta compartida (Google Drive)."]
+    },
+    seguridad: {
+      inicial:  ["Active copias de seguridad automáticas en la nube para fotos y archivos del negocio (Google Drive o similar)."],
+      basico:   ["Use contraseñas distintas y seguras para cada cuenta importante del negocio."],
+      avanzado: ["Active la verificación en dos pasos en sus cuentas principales (correo, redes sociales)."]
+    },
+    planificacion: {
+      inicial:  ["Elija un solo proceso para mejorar en los próximos tres meses, en vez de digitalizar todo a la vez."],
+      basico:   ["Defina una meta concreta y una fecha límite para implementar esa mejora."],
+      avanzado: ["Busque capacitación gratuita o acompañamiento (cámaras de comercio, SENA, UNAD) para el siguiente paso."]
+    }
+  };
+
+  return { DIMENSIONES, PREGUNTAS_CONTEXTO, PREGUNTAS, RECOMENDACIONES };
+})();
+
+/* ---------------------------- MÓDULO MOTOR ------------------------------ */
+/* Motor de clasificación: recibe las respuestas registradas en memoria y
+   calcula, para cada dimensión, un puntaje y un nivel orientativo
+   (inicial | básico | avanzado). Reglas documentadas y reproducibles:
+   con 3 preguntas de 0 a 2 puntos cada una, el puntaje por dimensión va
+   de 0 a 6; 0-2 = inicial, 3-4 = básico, 5-6 = avanzado. */
+const MOTOR = (function () {
+
+  function nivelDesdePuntaje(puntaje) {
+    if (puntaje <= 2) return "inicial";
+    if (puntaje <= 4) return "basico";
+    return "avanzado";
+  }
+
+  function calcular(respuestas) {
+    const resultado = {};
+    DATA.DIMENSIONES.forEach(function (dim) {
+      const preguntasDim = DATA.PREGUNTAS.filter(function (p) { return p.dimension === dim.id; });
+      let puntaje = 0;
+      preguntasDim.forEach(function (p) {
+        const v = respuestas[p.id];
+        puntaje += (typeof v === "number") ? v : 0;
+      });
+      resultado[dim.id] = {
+        puntaje: puntaje,
+        maximo: preguntasDim.length * 2,
+        nivel: nivelDesdePuntaje(puntaje)
+      };
+    });
+    return resultado;
+  }
+
+  function recomendacionesPara(resultado) {
+    const out = {};
+    Object.keys(resultado).forEach(function (dimId) {
+      const nivel = resultado[dimId].nivel;
+      out[dimId] = (DATA.RECOMENDACIONES[dimId] && DATA.RECOMENDACIONES[dimId][nivel]) || [];
+    });
+    return out;
+  }
+
+  return { calcular: calcular, recomendacionesPara: recomendacionesPara };
+})();
+
+/* --------------------------- MÓDULO INTERFAZ ----------------------------- */
+const INTERFAZ = (function () {
+
+  // Estado de la sesión, en memoria únicamente (no persiste al recargar).
+  const estado = {
+    pantalla: "bienvenida",   // bienvenida | contexto | cuestionario | procesando | resultados | recomendaciones
+    dimensionActual: 0,       // índice sobre DATA.DIMENSIONES mientras se responde
+    respuestasContexto: {},
+    respuestas: {},           // { preguntaId: valorNumerico }
+    resultado: null,
+    consentimiento: false
+  };
+
+  const root = document.getElementById("app");
+  const NIVEL_LABEL = { inicial: "Inicial", basico: "Básico", avanzado: "Avanzado" };
+
+  function el(tag, attrs, children) {
+    const node = document.createElement(tag);
+    attrs = attrs || {};
+    Object.keys(attrs).forEach(function (k) {
+      if (k === "class") node.className = attrs[k];
+      else if (k === "html") node.innerHTML = attrs[k];
+      else if (k.indexOf("on") === 0 && typeof attrs[k] === "function") node.addEventListener(k.slice(2), attrs[k]);
+      else node.setAttribute(k, attrs[k]);
+    });
+    (children || []).forEach(function (c) {
+      if (c) node.appendChild(typeof c === "string" ? document.createTextNode(c) : c);
+    });
+    return node;
+  }
+
+  function header(subtitulo) {
+    return el("header", { class: "app-header" }, [
+      el("div", { class: "brand" }, ["Proyecto de grado · UNAD · Ingeniería de Sistemas"]),
+      el("h1", {}, ["Autodiagnóstico Digital — Negocios de Servicios de Tunja"]),
+      subtitulo ? el("p", { class: "lead" }, [subtitulo]) : null
+    ]);
+  }
+
+  function footer() {
+    return el("footer", { class: "app-footer" }, [
+      "Prototipo académico sin fines comerciales · No almacena datos tras cerrar la sesión · TRL 5"
+    ]);
+  }
+
+  function progreso(pasoActual, pasoTotal, etiqueta) {
+    const pct = Math.round((pasoActual / pasoTotal) * 100);
+    return el("div", { class: "progress-wrap" }, [
+      el("div", { class: "progress-bar" }, [
+        el("div", { style: "width:" + pct + "%" })
+      ]),
+      el("div", { class: "progress-label" }, [etiqueta || (pasoActual + " de " + pasoTotal)])
+    ]);
+  }
+
+  /* ---------- Pantalla 1: Bienvenida ---------- */
+  function renderBienvenida() {
+    root.innerHTML = "";
+    root.appendChild(header("Reconozca en pocos minutos el estado digital de su negocio y reciba recomendaciones de bajo costo."));
+
+    const card = el("div", { class: "card" }, [
+      el("h2", { class: "screen-title" }, ["Antes de empezar"]),
+      el("p", {}, [
+        "Este autodiagnóstico consta de " + DATA.PREGUNTAS.length + " preguntas cerradas, organizadas en cinco dimensiones, " +
+        "y toma aproximadamente 5 minutos. Al finalizar verá un nivel orientativo por dimensión y recomendaciones " +
+        "prácticas y graduales para su negocio."
+      ]),
+      el("div", { class: "consent-box" }, [
+        el("strong", {}, ["Consentimiento informado. "]),
+        "Su participación es voluntaria y con fines académicos. No se solicitan contraseñas, números de identificación " +
+        "ni información financiera detallada. Las respuestas no se almacenan ni se envían a ningún servidor: existen solo " +
+        "en esta sesión del navegador y se pierden al cerrarla. Puede retirarse en cualquier momento sin consecuencias."
+      ]),
+      el("label", { class: "consent-row" }, [
+        (function () {
+          const cb = el("input", { type: "checkbox" });
+          cb.addEventListener("change", function (e) { estado.consentimiento = e.target.checked; btnEmpezar.disabled = !e.target.checked; });
+          return cb;
+        })(),
+        "He leído la información anterior y acepto participar voluntariamente en este autodiagnóstico."
+      ])
+    ]);
+
+    var btnEmpezar = el("button", {
+      class: "primary block", disabled: "disabled",
+      onclick: function () { estado.pantalla = "contexto"; render(); }
+    }, ["Comenzar autodiagnóstico →"]);
+
+    card.appendChild(el("div", { class: "nav-row" }, [btnEmpezar]));
+    root.appendChild(card);
+    root.appendChild(footer());
+  }
+
+  /* ---------- Pantalla previa: contexto (opcional, no se usa para clasificar) ---------- */
+  function renderContexto() {
+    root.innerHTML = "";
+    root.appendChild(header());
+    const card = el("div", { class: "card" }, [
+      el("h2", { class: "screen-title" }, ["Un poco sobre su negocio"]),
+      el("p", { class: "lead" }, ["Estas dos preguntas son opcionales y no afectan su resultado; solo dan contexto a la sesión."])
+    ]);
+
+    const grid = el("div", { class: "contexto-grid" });
+    DATA.PREGUNTAS_CONTEXTO.forEach(function (p) {
+      const input = el("input", { type: "text", id: p.id });
+      input.value = estado.respuestasContexto[p.id] || "";
+      input.addEventListener("input", function (e) { estado.respuestasContexto[p.id] = e.target.value; });
+      grid.appendChild(el("div", {}, [ el("label", { for: p.id }, [p.texto]), input ]));
+    });
+    card.appendChild(grid);
+
+    card.appendChild(el("div", { class: "nav-row" }, [
+      el("button", { class: "secondary", onclick: function () { estado.pantalla = "bienvenida"; render(); } }, ["← Atrás"]),
+      el("button", { class: "primary", onclick: function () { estado.dimensionActual = 0; estado.pantalla = "cuestionario"; render(); } }, ["Continuar →"])
+    ]));
+
+    root.appendChild(card);
+    root.appendChild(footer());
+  }
+
+  /* ---------- Pantalla 2: Cuestionario (una dimensión por paso) ---------- */
+  function renderCuestionario() {
+    root.innerHTML = "";
+    root.appendChild(header());
+
+    const dim = DATA.DIMENSIONES[estado.dimensionActual];
+    const preguntasDim = DATA.PREGUNTAS.filter(function (p) { return p.dimension === dim.id; });
+    const totalDims = DATA.DIMENSIONES.length;
+
+    const card = el("div", { class: "card" }, [
+      progreso(estado.dimensionActual + 1, totalDims, "Dimensión " + (estado.dimensionActual + 1) + " de " + totalDims),
+      el("div", { class: "dim-tag" }, [dim.icono + " " + dim.nombre]),
+      el("h2", { class: "screen-title" }, ["Responda según la situación actual de su negocio"])
+    ]);
+
+    let todasRespondidas = true;
+
+    preguntasDim.forEach(function (p) {
+      const fs = el("fieldset", {}, [ el("legend", {}, [p.texto]) ]);
+      const opsWrap = el("div", { class: "opciones" });
+
+      if (typeof estado.respuestas[p.id] !== "number") todasRespondidas = false;
+
+      p.opciones.forEach(function (op, idx) {
+        const inputId = p.id + "_" + idx;
+        const radio = el("input", {
+          type: "radio", name: p.id, id: inputId, value: op.valor
+        });
+        if (estado.respuestas[p.id] === op.valor) radio.checked = true;
+
+        const label = el("label", { class: "opcion" + (estado.respuestas[p.id] === op.valor ? " selected" : ""), for: inputId }, [radio, op.texto]);
+        radio.addEventListener("change", function () {
+          estado.respuestas[p.id] = op.valor;
+          render();
+        });
+        opsWrap.appendChild(label);
+      });
+      fs.appendChild(opsWrap);
+      card.appendChild(fs);
+    });
+
+    const esUltima = estado.dimensionActual === totalDims - 1;
+
+    const btnSiguiente = el("button", {
+      class: "primary",
+      onclick: function () {
+        if (esUltima) {
+          estado.pantalla = "procesando";
+          render();
+          setTimeout(function () {
+            estado.resultado = MOTOR.calcular(estado.respuestas);
+            estado.pantalla = "resultados";
+            render();
+          }, 900);
+        } else {
+          estado.dimensionActual += 1;
+          render();
+        }
+      }
+    }, [esUltima ? "Ver mis resultados →" : "Siguiente dimensión →"]);
+    if (!todasRespondidas) btnSiguiente.disabled = true;
+
+    card.appendChild(el("div", { class: "nav-row" }, [
+      el("button", {
+        class: "secondary",
+        onclick: function () {
+          if (estado.dimensionActual === 0) { estado.pantalla = "contexto"; }
+          else { estado.dimensionActual -= 1; }
+          render();
+        }
+      }, ["← Atrás"]),
+      btnSiguiente
+    ]));
+
+    root.appendChild(card);
+    root.appendChild(footer());
+  }
+
+  /* ---------- Pantalla 3: Procesamiento ---------- */
+  function renderProcesando() {
+    root.innerHTML = "";
+    root.appendChild(header());
+    const card = el("div", { class: "card centro" }, [
+      el("h2", { class: "screen-title" }, ["Calculando su autodiagnóstico…"]),
+      el("div", { class: "spinner" }),
+      el("p", { class: "lead" }, ["Esto toma solo un instante."])
+    ]);
+    root.appendChild(card);
+    root.appendChild(footer());
+  }
+
+  /* ---------- Pantalla 4: Resultado por dimensión ---------- */
+  function renderResultados() {
+    root.innerHTML = "";
+    root.appendChild(header());
+
+    const card = el("div", { class: "card" }, [
+      el("h2", { class: "screen-title" }, ["Su nivel por dimensión"]),
+      el("p", { class: "lead" }, [
+        "Este resultado es orientativo: se calcula a partir de sus respuestas y no constituye una certificación ni una medición absoluta de madurez digital."
+      ])
+    ]);
+
+    DATA.DIMENSIONES.forEach(function (dim) {
+      const r = estado.resultado[dim.id];
+      const pct = Math.round((r.puntaje / r.maximo) * 100);
+      const claseNivel = "nivel-" + r.nivel;
+
+      card.appendChild(el("div", { class: "resultado-dim" }, [
+        el("div", { class: "resultado-dim-head" }, [
+          el("strong", {}, [dim.icono + " " + dim.nombre]),
+          el("span", { class: "nivel-pill " + claseNivel }, [NIVEL_LABEL[r.nivel]])
+        ]),
+        el("div", { class: "barra-nivel" }, [
+          el("div", { class: claseNivel, style: "width:" + pct + "%" })
+        ])
+      ]));
+    });
+
+    card.appendChild(el("div", { class: "nav-row" }, [
+      el("button", { class: "secondary", onclick: function () { estado.pantalla = "bienvenida"; estado.dimensionActual = 0; estado.respuestas = {}; estado.resultado = null; render(); } }, ["Reiniciar"]),
+      el("button", { class: "primary", onclick: function () { estado.pantalla = "recomendaciones"; render(); } }, ["Ver recomendaciones →"])
+    ]));
+
+    root.appendChild(card);
+    root.appendChild(footer());
+  }
+
+  /* ---------- Pantalla 5: Recomendaciones ---------- */
+  function renderRecomendaciones() {
+    root.innerHTML = "";
+    root.appendChild(header());
+
+    const card = el("div", { class: "card" }, [
+      el("h2", { class: "screen-title" }, ["Recomendaciones para su negocio"]),
+      el("p", { class: "lead" }, ["Acciones graduales y de bajo costo, priorizadas según el nivel obtenido en cada dimensión."])
+    ]);
+
+    const recs = MOTOR.recomendacionesPara(estado.resultado);
+    DATA.DIMENSIONES.forEach(function (dim) {
+      const nivel = estado.resultado[dim.id].nivel;
+      const lista = recs[dim.id];
+      const ul = el("ul", {}, lista.map(function (texto) { return el("li", {}, [texto]); }));
+      card.appendChild(el("div", { class: "recom-dim" }, [
+        el("h3", {}, [dim.icono + " " + dim.nombre, el("span", { class: "nivel-pill nivel-" + nivel }, [NIVEL_LABEL[nivel]])]),
+        ul
+      ]));
+    });
+
+    card.appendChild(el("div", { class: "skip-note" }, [
+      "Recuerde: estas recomendaciones son orientativas y de carácter académico; no reemplazan asesoría empresarial, financiera, jurídica o de ciberseguridad profesional."
+    ]));
+
+    card.appendChild(el("div", { class: "nav-row" }, [
+      el("button", { class: "secondary", onclick: function () { estado.pantalla = "resultados"; render(); } }, ["← Ver niveles"]),
+      el("button", { class: "primary", onclick: function () { estado.pantalla = "bienvenida"; estado.dimensionActual = 0; estado.respuestas = {}; estado.respuestasContexto = {}; estado.resultado = null; render(); } }, ["Reiniciar autodiagnóstico"])
+    ]));
+
+    root.appendChild(card);
+    root.appendChild(footer());
+  }
+
+  function render() {
+    switch (estado.pantalla) {
+      case "bienvenida": return renderBienvenida();
+      case "contexto": return renderContexto();
+      case "cuestionario": return renderCuestionario();
+      case "procesando": return renderProcesando();
+      case "resultados": return renderResultados();
+      case "recomendaciones": return renderRecomendaciones();
+      default: return renderBienvenida();
+    }
+  }
+
+  return { render: render };
+})();
+
+/* ------------------------------- ARRANQUE -------------------------------- */
+INTERFAZ.render();
+</script>
+</body>
+</html>
