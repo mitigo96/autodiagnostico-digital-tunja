@@ -8,6 +8,8 @@ Universidad Nacional Abierta y a Distancia (UNAD), CEAD Tunja.
 **Fase:** 4 — Componente práctico (práctica simulada)
 **Nivel de madurez tecnológica (TRL):** TRL 5 — prototipo validado en entorno simulado
 
+🔗 **Demo en vivo:** https://mitigo96.github.io/autodiagnostico-digital-tunja/
+
 ## Qué hace
 
 El usuario (propietario o administrador de un pequeño negocio de servicios)
